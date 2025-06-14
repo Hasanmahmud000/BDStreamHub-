@@ -574,6 +574,36 @@ document.getElementById('subToday').addEventListener('click', () => {
       document.getElementById('match-list').innerHTML = '<p style="text-align:center; color:#f00;">Failed to load match data.</p>';
     });
 </script>
+<!-- Telegram Join Popup -->
+<div id="telegramPopup" style="display:none;">
+  <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa; z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div style="background:#222; padding:20px 25px; border-radius:12px; max-width:90%; width:340px; text-align:center; box-shadow:0 0 10px #000;">
+      <h3 style="color:#0af; margin-bottom:10px;">📣 Join Our Telegram</h3>
+      <p style="color:#ccc; font-size:14px;">🔔 For live match updates, instant scores, and exclusive stream links —
+Join our official Telegram channel now!
+📲 Download the NS Player app for smooth, uninterrupted streaming.</p>
+      <div style="margin-top:15px;">
+        <a href="https://t.me/BDStreamHub" target="_blank" style="background:#08f; color:#fff; padding:10px 18px; text-decoration:none; border-radius:8px; display:inline-block; font-weight:600;">Join Now</a>
+        <button onclick="closeTelegramPopup()" style="margin-left:10px; background:#444; color:#ccc; padding:10px 18px; border:none; border-radius:8px; cursor:pointer;">Later</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function closeTelegramPopup() {
+    document.getElementById('telegramPopup').style.display = 'none';
+    localStorage.setItem('hideTelegramPopup', 'true');
+  }
+
+  window.addEventListener('load', () => {
+    const alreadyClosed = localStorage.getItem('hideTelegramPopup');
+    if (!alreadyClosed) {
+      setTimeout(() => {
+        document.getElementById('telegramPopup').style.display = 'block';
+      }, 5000); // ৫ সেকেন্ড পরে দেখাবে
+    }
+  });
+</script>
 
 </body>
 </html>
