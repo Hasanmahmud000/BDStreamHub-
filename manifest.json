@@ -1,10 +1,11 @@
 {
-  "name": "BDStreamHub",
-  "short_name": "BDStreamHub",
-  "start_url": "./index.html",
+  "name": "CricStreamZone",
+  "short_name": "CricZone",
+  "start_url": "/CricStreamZone/",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#00ffff",
+  "background_color": "#ffffff",
+  "theme_color": "#0055ff",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
