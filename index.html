@@ -342,24 +342,27 @@ Google Play Store or join our Telegram channel for the latest updates and app li
   list.innerHTML = "";
   const filter = document.getElementById('search').value.toLowerCase();
 
-  let filteredMatches = matches.filter(m => {  
-  const ct = new Date(m.MatchTime);  
-  const isLive = now >= ct;  
-  
-  if (type === 'live' && !isLive) return false;  
-  
-  else if (type === 'today') {  
-    if (ct < todayStart || ct >= todayEnd || isLive) return false;  
-  }  
-  
-  else if (type === 'upcoming') {  
-    if (ct < now || (ct >= todayStart && ct < todayEnd)) return false;  
-  }  
-  
-  if (filter && !(m.Match.toLowerCase().includes(filter) || m.Team1.toLowerCase().includes(filter) || m.Team2.toLowerCase().includes(filter))) return false;  
-  
-  return true;  
+  let filteredMatches = matches.filter(m => {
+  const ct = new Date(m.MatchTime);
+  const isLive = now >= ct;
+
+  if (type === 'live' && !isLive) return false;
+
+  else if (type === 'today') {
+    if (ct < todayStart || ct >= todayEnd || isLive) return false;
+  }
+
+  else if (type === 'upcoming') {
+    if (ct < now || (ct >= todayStart && ct < todayEnd)) return false;
+  }
+
+  if (filter && !(m.Match.toLowerCase().includes(filter) || m.Team1.toLowerCase().includes(filter) || m.Team2.toLowerCase().includes(filter))) return false;
+
+  return true;
 });
+
+// 🔀 এইখানে টাইম অনুযায়ী ছোট থেকে বড় সাজানো হচ্ছে
+filteredMatches.sort((a, b) => new Date(a.MatchTime) - new Date(b.MatchTime));
 
   if (filteredMatches.length === 0) {
   let emojiMessage = '😴 No matches available right now.';
@@ -394,41 +397,81 @@ Google Play Store or join our Telegram channel for the latest updates and app li
 }
 
   filteredMatches.forEach((m, i) => {
-    const ct = new Date(m.MatchTime);
-    const isLive = now >= ct;
+  const ct = new Date(m.MatchTime);
+  const isLive = now >= ct;
 
-    const div = document.createElement('div');
-    div.className = "match";
+  const div = document.createElement('div');
+  div.className = "match";
 
-    let timerHtml = '';
-    if (isLive) {
-      const diffLive = getNow() - ct;
-      timerHtml = `
-        <div class="liveBlink">LIVE</div>
+  let timerHtml = '';
+  if (isLive) {
+    const diffLive = getNow() - ct;
+    timerHtml = `
+      <div style="text-align: center; margin: 10px 0;">
+        <div id="liveAnim${i}" style="width: 60px; height: 60px; margin: 0 auto;"></div>
         <div class="countdown" id="cd${type}${i}">Started ${formatCountUp(diffLive)}</div>
-      `;
-    } else {
-      timerHtml = `
-        <div class="match-time">Starts at: ${ct.toLocaleDateString('en-US')} ${ct.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true})}</div>
-        <div class="countdown" id="cd${type}${i}">${formatCountdown(getCountdown(m.MatchTime))}</div>
-      `;
-    }
-
-    div.innerHTML = `
-      <div class="teams">
-        <img src="${m.Team1Logo}" alt="${m.Team1} logo" loading="lazy" />
-        ${m.Team1}
-        <span style="margin: 0 10px; color: #0af;">vs</span>
-        ${m.Team2}
-        <img src="${m.Team2Logo}" alt="${m.Team2} logo" loading="lazy" />
-      </div>
-      ${timerHtml}
-      <div class="btns">
-        ${m.Intent1 ? `<a href="${m.Intent1}" target="_blank" rel="noopener noreferrer">Server 1</a>` : ""}
-        ${m.Intent2 ? `<a href="${m.Intent2}" target="_blank" rel="noopener noreferrer">Server 2</a>` : ""}
-        ${m.Intent3 ? `<a href="${m.Intent3}" target="_blank" rel="noopener noreferrer">Server 3</a>` : ""}
       </div>
     `;
+  } else {
+    const dateStr = ct.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const timeStr = ct.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    timerHtml = `
+      <div class="match-time"> ${dateStr}</div>
+      <div class="match-time"> ${timeStr}</div>
+      <div class="countdown" id="cd${type}${i}">⏳ ${formatCountdown(getCountdown(m.MatchTime))}</div>
+      ${getCountdown(m.MatchTime) <= 15 * 60 * 1000 ? `<div class="coming-soon-anim">⏳ Coming Soon...</div>` : ''}
+    `;
+  }
+
+  div.innerHTML = `
+    <div class="teams">
+      <img src="${m.Team1Logo}" alt="${m.Team1} logo" loading="lazy" />
+      ${m.Team1}
+      <span style="margin: 0 10px; color: #0af;">vs</span>
+      ${m.Team2}
+      <img src="${m.Team2Logo}" alt="${m.Team2} logo" loading="lazy" />
+    </div>
+    ${timerHtml}
+    <div class="btns">
+      ${m.Intent1 ? `<a href="${m.Intent1}" target="_blank" rel="noopener noreferrer">Server 1</a>` : ""}
+      ${m.Intent2 ? `<a href="${m.Intent2}" target="_blank" rel="noopener noreferrer">Server 2</a>` : ""}
+      ${m.Intent3 ? `<a href="${m.Intent3}" target="_blank" rel="noopener noreferrer">Server 3</a>` : ""}
+    </div>
+  `;
+
+  list.appendChild(div);
+
+  // ⬇️ এইখানে Lottie animation শুরু হবে live এর জন্য
+  if (isLive) {
+    setTimeout(() => {
+      bodymovin.loadAnimation({
+        container: document.getElementById('liveAnim' + i),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'https://raw.githubusercontent.com/Hasanmahmud000/HasanTv/refs/heads/main/live-icon.json'
+      });
+    }, 0);
+  }
+
+    div.innerHTML = `
+  <div style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:10px; color:#0af;">
+    ${m.Match}
+  </div>
+  <div class="teams">
+    <img src="${m.Team1Logo}" alt="${m.Team1} logo" loading="lazy" />
+    ${m.Team1}
+    <span style="margin: 0 10px; color: #0af;">vs</span>
+    ${m.Team2}
+    <img src="${m.Team2Logo}" alt="${m.Team2} logo" loading="lazy" />
+  </div>
+  ${timerHtml}
+  <div class="btns">
+    ${m.Intent1 ? `<a href="${m.Intent1}" target="_blank" rel="noopener noreferrer">Server 1</a>` : ""}
+    ${m.Intent2 ? `<a href="${m.Intent2}" target="_blank" rel="noopener noreferrer">Server 2</a>` : ""}
+    ${m.Intent3 ? `<a href="${m.Intent3}" target="_blank" rel="noopener noreferrer">Server 3</a>` : ""}
+  </div>
+`;
 
     list.appendChild(div);
 
@@ -606,4 +649,4 @@ Join our official Telegram channel now!
 </script>
 
 </body>
-</html>
+  </html>
