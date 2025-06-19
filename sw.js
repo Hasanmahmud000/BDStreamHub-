@@ -1,4 +1,4 @@
-const CACHE_NAME = "cric-v5"; // প্রতিবার version বাড়াও (v6, v7 ...)
+const CACHE_NAME = "cric-v6"; // প্রতিবার version বাড়াও (v6, v7 ...)
 const urlsToCache = [
   "/",
   "/index.html",
