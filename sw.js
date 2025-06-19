@@ -1,52 +1,42 @@
-// ✅ Cache version — যখনই আপডেট আনবে এটা v2 → v3 → v4 করে দিও
-const CACHE_NAME = 'cricstreamzone-v2';
+const CACHE_NAME = "cric-v1"; // নতুন version প্রতিবার বদলাও
+const urlsToCache = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  // অন্য যেসব ফাইল তোমার দরকার
+];
 
-// ✅ Install event — অ্যাসেটগুলো cache-এ জমাবে
-self.addEventListener('install', function (e) {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/manifest.json',
-        '/style.css',       // যদি থাকে
-        '/script.js',       // যদি থাকে
-        '/icon-192.png',
-        '/icon-512.png'
-      ]);
-    })
+self.addEventListener("install", (event) => {
+  self.skipWaiting(); // 👉 নতুন version সঙ্গে সঙ্গে activate হবে
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
-  self.skipWaiting(); // সঙ্গে সঙ্গে activate করার জন্য
 });
 
-// ✅ Activate event — পুরাতন cache গুলো মুছে ফেলবে
-self.addEventListener('activate', function (e) {
-  e.waitUntil(
-    caches.keys().then(function (keyList) {
-      return Promise.all(
-        keyList.map(function (key) {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
           }
         })
-      );
-    })
-  );
-  return self.clients.claim();
-});
-
-// ✅ Fetch event — cache → না পেলে network থেকে data আনে
-self.addEventListener('fetch', function (e) {
-  e.respondWith(
-    caches.match(e.request).then(function (response) {
-      return response || fetch(e.request);
-    })
+      )
+    )
   );
 });
 
-// ✅ Message event — JS থেকে 'SKIP_WAITING' পাঠালে সঙ্গে সঙ্গে নতুন SW active হবে
-self.addEventListener('message', function (event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data.action === 'skipWaiting') {
     self.skipWaiting();
   }
 });
