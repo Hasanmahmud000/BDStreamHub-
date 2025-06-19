@@ -1,15 +1,16 @@
-const CACHE_NAME = "cric-v1"; // নতুন version প্রতিবার বদলাও
+const CACHE_NAME = "cric-v5"; // প্রতিবার version বাড়াও (v6, v7 ...)
 const urlsToCache = [
   "/",
   "/index.html",
-  "/manifest.json",
-  // অন্য যেসব ফাইল তোমার দরকার
+  "/manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
-  self.skipWaiting(); // 👉 নতুন version সঙ্গে সঙ্গে activate হবে
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
@@ -18,9 +19,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((cacheNames) =>
       Promise.all(
         cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            return caches.delete(name);
-          }
+          if (name !== CACHE_NAME) return caches.delete(name);
         })
       )
     )
@@ -29,14 +28,12 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then((res) => res || fetch(event.request))
   );
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data.action === 'skipWaiting') {
+  if (event.data.action === "skipWaiting") {
     self.skipWaiting();
   }
 });
