@@ -8,14 +8,6 @@
   <!-- manifest ফাইল লিংক -->
 <link rel="manifest" href="manifest.json">
 
-<!-- Service Worker রেজিস্টার -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log("✅ Service Worker registered"))
-      .catch(err => console.log("❌ SW error:", err));
-  }
-</script>
   <style>
   	.menu-dropdown {
   position: relative;
@@ -633,67 +625,63 @@ Join our official Telegram channel now!
   </div>
 </div>
 <script>
-  function closeTelegramPopup() {
-    document.getElementById('telegramPopup').style.display = 'none';
-    localStorage.setItem('hideTelegramPopup', 'true');
-  }
-
-  window.addEventListener('load', () => {
-    const alreadyClosed = localStorage.getItem('hideTelegramPopup');
-    if (!alreadyClosed) {
-      setTimeout(() => {
-        document.getElementById('telegramPopup').style.display = 'block';
-      }, 5000); // ৫ সেকেন্ড পরে দেখাবে
-    }
-  });
-<script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      if (reg.waiting) {
-        showUpdatePrompt();
-      }
+    navigator.serviceWorker.register('sw.js').then(registration => {
 
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdatePrompt();
+      function listenForWaitingServiceWorker(reg, callback) {
+        if (!reg) return;
+        if (reg.waiting) return callback();
+
+        function onStateChange() {
+          if (this.state === 'installed') {
+            callback();
+          }
+        }
+
+        if (reg.installing) {
+          reg.installing.addEventListener('statechange', onStateChange);
+        }
+
+        reg.addEventListener('updatefound', () => {
+          if (reg.installing) {
+            reg.installing.addEventListener('statechange', onStateChange);
           }
         });
-      });
+      }
+
+      function showUpdatePopup() {
+        const updateDiv = document.createElement('div');
+        updateDiv.innerHTML = "🆕 New version available — <b>Tap to update</b>";
+        updateDiv.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #0af;
+          color: white;
+          padding: 12px 18px;
+          font-weight: bold;
+          border-radius: 25px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          z-index: 9999;
+          cursor: pointer;
+        `;
+        updateDiv.onclick = () => {
+          updateDiv.remove();
+          if (registration.waiting) {
+            registration.waiting.postMessage({ action: 'skipWaiting' });
+          }
+        };
+        document.body.appendChild(updateDiv);
+      }
+
+      listenForWaitingServiceWorker(registration, showUpdatePopup);
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
     });
   }
-
-  function showUpdatePrompt() {
-    const updateBox = document.createElement('div');
-    updateBox.style.position = 'fixed';
-    updateBox.style.bottom = '20px';
-    updateBox.style.left = '50%';
-    updateBox.style.transform = 'translateX(-50%)';
-    updateBox.style.background = '#0af';
-    updateBox.style.color = '#fff';
-    updateBox.style.padding = '12px 20px';
-    updateBox.style.borderRadius = '30px';
-    updateBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-    updateBox.style.zIndex = '9999';
-    updateBox.style.fontWeight = 'bold';
-    updateBox.style.cursor = 'pointer';
-    updateBox.textContent = '🔄 New version available - Click to update';
-
-    updateBox.onclick = () => {
-      updateBox.remove();
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
-      }
-    };
-
-    document.body.appendChild(updateBox);
-  }
-
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
-  });
 </script>
-
-</body>
+ </body>
 </html>
