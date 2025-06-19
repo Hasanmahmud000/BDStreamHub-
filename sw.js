@@ -1,4 +1,5 @@
-const CACHE_NAME = "cric-v6"; // প্রতিবার version বাড়াও (v6, v7 ...)
+const CACHE_NAME = "cric-v7"; // প্রতিবার update দিলে version change করো
+
 const urlsToCache = [
   "/",
   "/index.html",
@@ -16,14 +17,13 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) return caches.delete(name);
-        })
-      )
+    caches.keys().then((names) =>
+      Promise.all(names.map((name) => {
+        if (name !== CACHE_NAME) return caches.delete(name);
+      }))
     )
   );
+  return self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
@@ -32,8 +32,8 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'skipWaiting') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.action === "skipWaiting") {
     self.skipWaiting();
   }
 });
