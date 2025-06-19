@@ -646,45 +646,54 @@ Join our official Telegram channel now!
       }, 5000); // ৫ সেকেন্ড পরে দেখাবে
     }
   });
-<!-- 🔁 Service Worker Update Detection Script -->
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(function (reg) {
-      console.log('✅ Service Worker registered');
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      if (reg.waiting) {
+        showUpdatePrompt();
+      }
 
-      reg.onupdatefound = function () {
+      reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
-        newWorker.onstatechange = function () {
+        newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateBar();
+            showUpdatePrompt();
           }
-        };
-      };
-    });
-
-    navigator.serviceWorker.addEventListener('controllerchange', function () {
-      window.location.reload();
-    });
-  }
-
-  function showUpdateBar() {
-    const bar = document.createElement('div');
-    bar.innerHTML = `
-      <div style="position:fixed; bottom:0; left:0; right:0; background:#0af; color:#fff; padding:12px; font-weight:bold; text-align:center; z-index:9999;">
-        🔄 New Update Available!
-        <button style="margin-left:10px; padding:5px 12px; background:white; color:#0af; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">Update Now</button>
-      </div>
-    `;
-    document.body.appendChild(bar);
-    bar.querySelector('button').addEventListener('click', function () {
-      navigator.serviceWorker.getRegistration().then(function (reg) {
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
+        });
       });
     });
   }
+
+  function showUpdatePrompt() {
+    const updateBox = document.createElement('div');
+    updateBox.style.position = 'fixed';
+    updateBox.style.bottom = '20px';
+    updateBox.style.left = '50%';
+    updateBox.style.transform = 'translateX(-50%)';
+    updateBox.style.background = '#0af';
+    updateBox.style.color = '#fff';
+    updateBox.style.padding = '12px 20px';
+    updateBox.style.borderRadius = '30px';
+    updateBox.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+    updateBox.style.zIndex = '9999';
+    updateBox.style.fontWeight = 'bold';
+    updateBox.style.cursor = 'pointer';
+    updateBox.textContent = '🔄 New version available - Click to update';
+
+    updateBox.onclick = () => {
+      updateBox.remove();
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+      }
+    };
+
+    document.body.appendChild(updateBox);
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 </script>
 
 </body>
-  </html>
+</html>
