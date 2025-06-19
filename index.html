@@ -5,17 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CricStreamZone - Live Matches & Upcoming</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
-  <!-- manifest ফাইল লিংক -->
-<link rel="manifest" href="manifest.json">
-
-<!-- Service Worker রেজিস্টার -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log("✅ Service Worker registered"))
-      .catch(err => console.log("❌ SW error:", err));
-  }
-</script>
+ 
   <style>
   	.menu-dropdown {
   position: relative;
@@ -648,5 +638,45 @@ Join our official Telegram channel now!
   });
 </script>
 
+<!-- 🔁 Service Worker Update Detection Script -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      console.log('✅ Service Worker registered');
+
+      reg.onupdatefound = function () {
+        const newWorker = reg.installing;
+        newWorker.onstatechange = function () {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBar();
+          }
+        };
+      };
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      window.location.reload();
+    });
+  }
+
+  function showUpdateBar() {
+    const bar = document.createElement('div');
+    bar.innerHTML = `
+      <div style="position:fixed; bottom:0; left:0; right:0; background:#0af; color:#fff; padding:12px; font-weight:bold; text-align:center; z-index:9999;">
+        🔄 New Update Available!
+        <button style="margin-left:10px; padding:5px 12px; background:white; color:#0af; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">Update Now</button>
+      </div>
+    `;
+    document.body.appendChild(bar);
+    bar.querySelector('button').addEventListener('click', function () {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    });
+  }
+</script>
+
 </body>
-  </html>
+</html>
