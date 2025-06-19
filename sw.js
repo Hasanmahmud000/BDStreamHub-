@@ -1,4 +1,4 @@
-const CACHE_NAME = "cricZone-v7"; // প্রতিবার update দিলে version change করো
+const CACHE_NAME = "cricZone-v8"; // প্রতিবার update দিলে version change করো
 
 const urlsToCache = [
   "/",
