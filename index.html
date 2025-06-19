@@ -5,67 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CricStreamZone - Live Matches & Upcoming</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(registration => {
-
-      function showUpdatePopup() {
-        const box = document.createElement('div');
-        box.innerHTML = "🆕 New version available — <b>Tap to update</b>";
-        box.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #0af;
-          color: white;
-          padding: 12px 16px;
-          border-radius: 30px;
-          font-weight: bold;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-          z-index: 9999;
-          cursor: pointer;
-        `;
-        box.onclick = () => {
-          box.remove();
-          if (registration.waiting) {
-            registration.waiting.postMessage({ action: "skipWaiting" });
-          }
-        };
-        document.body.appendChild(box);
-      }
-
-      function listenForWaitingSW(reg) {
-        if (!reg) return;
-        if (reg.waiting) return showUpdatePopup();
-
-        if (reg.installing) {
-          reg.installing.addEventListener("statechange", function () {
-            if (this.state === "installed" && navigator.serviceWorker.controller) {
-              showUpdatePopup();
-            }
-          });
-        }
-
-        reg.addEventListener("updatefound", () => {
-          if (reg.installing) {
-            reg.installing.addEventListener("statechange", function () {
-              if (this.state === "installed" && navigator.serviceWorker.controller) {
-                showUpdatePopup();
-              }
-            });
-          }
-        });
-      }
-
-      listenForWaitingSW(registration);
-    });
-
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    });
-  }
-</script>
+  
   <style>
   	.menu-dropdown {
   position: relative;
@@ -696,6 +636,66 @@ Join our official Telegram channel now!
       }, 5000); // ৫ সেকেন্ড পরে দেখাবে
     }
   });
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(registration => {
+
+      function showUpdatePopup() {
+        const box = document.createElement('div');
+        box.innerHTML = "🆕 New version available — <b>Tap to update</b>";
+        box.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #0af;
+          color: white;
+          padding: 12px 16px;
+          border-radius: 30px;
+          font-weight: bold;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          z-index: 9999;
+          cursor: pointer;
+        `;
+        box.onclick = () => {
+          box.remove();
+          if (registration.waiting) {
+            registration.waiting.postMessage({ action: "skipWaiting" });
+          }
+        };
+        document.body.appendChild(box);
+      }
+
+      function listenForWaitingSW(reg) {
+        if (!reg) return;
+        if (reg.waiting) return showUpdatePopup();
+
+        if (reg.installing) {
+          reg.installing.addEventListener("statechange", function () {
+            if (this.state === "installed" && navigator.serviceWorker.controller) {
+              showUpdatePopup();
+            }
+          });
+        }
+
+        reg.addEventListener("updatefound", () => {
+          if (reg.installing) {
+            reg.installing.addEventListener("statechange", function () {
+              if (this.state === "installed" && navigator.serviceWorker.controller) {
+                showUpdatePopup();
+              }
+            });
+          }
+        });
+      }
+
+      listenForWaitingSW(registration);
+    });
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      window.location.reload();
+    });
+  }
 </script>
 
 </body>
